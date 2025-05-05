@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<style>
+    .comment-bubble {
+        position: relative;
+    }
+    .comment-bubble::before {
+        content: '';
+        position: absolute;
+        top: 15px;
+        left: -10px;
+        border-width: 10px 10px 10px 0;
+        border-style: solid;
+        border-color: transparent #f3f4f6 transparent transparent;
+    }
+    .attachment-item {
+        transition: all 0.2s ease;
+    }
+    .attachment-item:hover {
+        transform: translateY(-2px);
+    }
+    .task-action-btn {
+        transition: all 0.2s ease;
+    }
+    .task-action-btn:hover {
+        transform: translateY(-2px);
+    }
+    .status-toggle {
+        transition: all 0.3s ease;
+    }
+    .status-toggle:hover {
+        transform: scale(1.05);
+    }
+    .file-upload-area {
+        border: 2px dashed #d1d5db;
+        transition: all 0.2s ease;
+    }
+    .file-upload-area:hover {
+        border-color: #0ea5e9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <!-- Back Navigation -->
+    <div class="mb-6">
+        <a href="{% url 'task_list' %}" class="text-primary-600 hover:text-primary-800 flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Tasks
+        </a>
+    </div>
+
+    <!-- Task Header -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+        <div class="bg-gradient-to-r from-primary-600 to-secondary-600 p-6 text-white">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-2xl font-bold">{{ task.title }}</h1>
+                    <p class="text-primary-100 mt-1">Created on {{ task.created_at|date:"F j, Y" }}</p>
+                </div>
+                <div>
+                    {% if task.completed %}
+                        <button class="status-toggle bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full flex items-center">
+                            <i class="fas fa-check-circle mr-2"></i> Completed
+                        </button>
+                    {% else %}
+                        <button class="status-toggle bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-full flex items-center">
+                            <i class="fas fa-hourglass-half mr-2"></i> Pending
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Task Details -->
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-2">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Description</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-700 whitespace-pre-line">{{ task.description }}</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Details</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <div class="bg-primary-100 p-2 rounded-full mr-3">
+                                    <i class="far fa-calendar-alt text-primary-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Due Date</p>
+                                    <p class="font-medium text-gray-800">{{ task.due_date|date:"F j, Y" }}</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="bg-primary-100 p-2 rounded-full mr-3">
+                                    <i class="far fa-user text-primary-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Assigned To</p>
+                                    <p class="font-medium text-gray-800">{{ task.assigned_to.username }}</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="bg-primary-100 p-2 rounded-full mr-3">
+                                    <i class="far fa-clock text-primary-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Created</p>
+                                    <p class="font-medium text-gray-800">{{ task.created_at|date:"F j, Y" }}</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="bg-primary-100 p-2 rounded-full mr-3">
+                                    <i class="fas fa-tag text-primary-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Priority</p>
+                                    <p class="font-medium text-gray-800">
+                                        <!-- Just for visual enhancement -->
+                                        {% if task.id|divisibleby:3 %}
+                                            <span class="text-red-600">High</span>
+                                        {% elif task.id|divisibleby:2 %}
+                                            <span class="text-amber-600">Medium</span>
+                                        {% else %}
+                                            <span class="text-blue-600">Low</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Task Actions -->
+            <div class="flex flex-wrap gap-3 mt-6 border-t border-gray-200 pt-6">
+                <a href="{% url 'task_update' task.id %}" class="task-action-btn bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg flex items-center">
+                    <i class="fas fa-edit mr-2"></i> Edit Task
+                </a>
+                <a href="{% url 'task_delete' task.id %}" class="task-action-btn bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center">
+                    <i class="fas fa-trash-alt mr-2"></i> Delete Task
+                </a>
+                <button class="task-action-btn bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center">
+                    <i class="fas fa-share-alt mr-2"></i> Share
+                </button>
+                <button class="task-action-btn bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center ml-auto">
+                    <i class="fas fa-check mr-2"></i> Mark Complete
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Attachments Section -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                <i class="fas fa-paperclip text-primary-500 mr-2"></i> Attachments
+            </h2>
+            <button id="toggle-upload" class="text-primary-600 hover:text-primary-800 flex items-center text-sm font-medium">
+                <i class="fas fa-plus mr-1"></i> Add File
+            </button>
+        </div>
+        
+        <!-- File Upload Area (Hidden by default) -->
+        <div id="file-upload-area" class="hidden mb-6">
+            <div class="file-upload-area rounded-lg p-6 text-center">
+                <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <i class="fas fa-cloud-upload-alt text-gray-400 text-4xl mb-2"></i>
+                        <p class="text-gray-600 mb-2">Drag and drop files here or click to browse</p>
+                        <input type="file" name="file" class="w-full text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
+                    </div>
+                    <button type="submit" name="file_upload" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-upload mr-2"></i> Upload File
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Attachments List -->
+        {% if attachments %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for attachment in attachments %}
+                    <div class="bg-gray-50 p-4 rounded-lg flex items-center attachment-item">
+                        <div class="bg-primary-100 p-3 rounded-lg mr-3">
+                            <i class="fas fa-file-alt text-primary-600 text-xl"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <p class="font-medium text-gray-800 truncate">{{ attachment.file.name|slice:"14:" }}</p>
+                            <p class="text-xs text-gray-500">Uploaded on {{ attachment.uploaded_at|date:"M d, Y" }}</p>
+                        </div>
+                        <a href="{{ attachment.file.url }}" class="text-primary-600 hover:text-primary-800 ml-2" target="_blank" download>
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-8 bg-gray-50 rounded-lg">
+                <div class="bg-gray-100 inline-block p-4 rounded-full mb-3">
+                    <i class="fas fa-file-upload text-gray-400 text-3xl"></i>
+                </div>
+                <h3 class="text-gray-600 font-medium mb-2">No attachments yet</h3>
+                <p class="text-gray-500 mb-4">Upload files related to this task</p>
+                <button id="show-upload" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg">
+                    <i class="fas fa-plus mr-2"></i> Add Attachment
+                </button>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Comments Section -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+            <i class="fas fa-comments text-primary-500 mr-2"></i> Comments & Discussion
+        </h2>
+        
+        <!-- New Comment Form -->
+        <div class="mb-8">
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                <div class="relative">
+                    <textarea name="content" rows="3" class="w-full border border-gray-300 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="Add a comment..."></textarea>
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg flex items-center">
+                        <i class="fas fa-paper-plane mr-2"></i> Post Comment
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Comments List -->
+        <div class="space-y-6">
+            {% for comment in comments %}
+                <div class="flex">
+                    <div class="mr-4">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center text-white font-bold">
+                            {{ comment.user.username|first|upper }}
+                        </div>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="bg-gray-100 p-4 rounded-lg comment-bubble">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <span class="font-medium text-gray-800">{{ comment.user.username }}</span>
+                                    <span class="text-xs text-gray-500 ml-2">{{ comment.created_at|date:"M d, Y" }} at {{ comment.created_at|date:"H:i" }}</span>
+                                </div>
+                                <div class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </div>
+                            </div>
+                            <p class="text-gray-700">{{ comment.content }}</p>
+                        </div>
+                        <div class="flex items-center mt-2 ml-2 text-sm">
+                            <button class="text-gray-500 hover:text-gray-700 mr-4">
+                                <i class="far fa-thumbs-up mr-1"></i> Like
+                            </button>
+                            <button class="text-gray-500 hover:text-gray-700">
+                                <i class="far fa-comment mr-1"></i> Reply
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center py-8 bg-gray-50 rounded-lg">
+                    <div class="bg-gray-100 inline-block p-4 rounded-full mb-3">
+                        <i class="far fa-comments text-gray-400 text-3xl"></i>
+                    </div>
+                    <h3 class="text-gray-600 font-medium mb-2">No comments yet</h3>
+                    <p class="text-gray-500">Be the first to add a comment to this task</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle file upload area
+        const toggleUploadBtn = document.getElementById('toggle-upload');
+        const showUploadBtn = document.getElementById('show-upload');
+        const fileUploadArea = document.getElementById('file-upload-area');
+        
+        if (toggleUploadBtn && fileUploadArea) {
+            toggleUploadBtn.addEventListener('click', function() {
+                fileUploadArea.classList.toggle('hidden');
+                
+                if (fileUploadArea.classList.contains('hidden')) {
+                    toggleUploadBtn.innerHTML = '<i class="fas fa-plus mr-1"></i> Add File';
+                } else {
+                    toggleUploadBtn.innerHTML = '<i class="fas fa-minus mr-1"></i> Cancel';
+                }
+            });
+        }
+        
+        if (showUploadBtn && fileUploadArea) {
+            showUploadBtn.addEventListener('click', function() {
+                fileUploadArea.classList.remove('hidden');
+                toggleUploadBtn.innerHTML = '<i class="fas fa-minus mr-1"></i> Cancel';
+            });
+        }
+        
+        // Status toggle functionality
+        const statusToggle = document.querySelector('.status-toggle');
+        
+        if (statusToggle) {
+            statusToggle.addEventListener('click', function() {
+                if (this.classList.contains('bg-green-500')) {
+                    // Change to pending
+                    this.classList.remove('bg-green-500', 'hover:bg-green-600');
+                    this.classList.add('bg-amber-500', 'hover:bg-amber-600');
+                    this.innerHTML = '<i class="fas fa-hourglass-half mr-2"></i> Pending';
+                } else {
+                    // Change to completed
+                    this.classList.remove('bg-amber-500', 'hover:bg-amber-600');
+                    this.classList.add('bg-green-500', 'hover:bg-green-600');
+                    this.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Completed';
+                }
+                
+                // Here you would typically make an AJAX call to update the task status
+                console.log('Task status toggled');
+            });
+        }
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

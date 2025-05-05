@@ -1,0 +1,468 @@
+<!-- filepath: c:\Users\HP\Desktop\task_manager\TaskManager\tasks\templates\base.html -->
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TaskFlow Pro{% endblock %}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81'
+                        },
+                        secondary: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95'
+                        },
+                        accent: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f'
+                        },
+                        dark: {
+                            100: '#1e293b', // slate-800
+                            200: '#0f172a', // slate-900
+                            300: '#020617'  // slate-950
+                        }
+                    },
+                    fontFamily: { sans: ['Poppins', 'sans-serif'] },
+                    boxShadow: {
+                        'nav': '0 4px 12px 0 rgba(0, 0, 0, 0.05)',
+                        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        'button': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                        'dark-nav': '0 4px 12px 0 rgba(0, 0, 0, 0.3)'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
+        
+        /* Enhanced Navigation Styling */
+        .nav-link { 
+            position: relative; 
+            padding-bottom: 4px;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(to right, #4f46e5, #7c3aed);
+            transition: width 0.3s ease-in-out;
+            border-radius: 2px;
+        }
+        
+        .nav-link:hover::after { 
+            width: 100%; 
+        }
+        
+        .nav-link:hover i {
+            transform: translateY(-2px);
+        }
+        
+        .nav-link i {
+            transition: transform 0.2s ease;
+        }
+        
+        .logo-container {
+            transition: transform 0.3s ease;
+        }
+        
+        .logo-container:hover {
+            transform: scale(1.05);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(to right, #4f46e5, #7c3aed);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .notification-bar {
+            animation: slideDown 0.5s ease-in-out;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .nav-button {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .nav-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(79, 70, 229, 0.1), rgba(124, 58, 237, 0.1));
+            transition: left 0.3s ease;
+            z-index: -1;
+            border-radius: 0.375rem;
+        }
+        
+        .nav-button:hover::before {
+            left: 0;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50 dark:bg-dark-200 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-300">
+    <!-- Top notification bar -->
+    <div class="notification-bar bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-800 dark:to-purple-900 text-white text-center py-3 px-4 text-sm shadow-lg transition-colors duration-300">
+        <div class="container mx-auto flex items-center justify-center">
+            <div class="animate-pulse mr-3">
+                <i class="fas fa-bolt text-yellow-300 dark:text-yellow-400"></i>
+            </div>
+            <span>Welcome to TaskFlow Pro - Boost your productivity with our new features!</span>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-white dark:bg-dark-100 shadow-lg dark:shadow-dark-nav px-6 py-4 sticky top-0 z-50 transition-all duration-300">
+        <div class="container mx-auto">
+            <div class="flex justify-between items-center">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 logo-container">
+                        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-3 rounded-lg shadow-md transform transition-transform duration-300">
+                            <i class="fas fa-tasks text-white text-xl"></i>
+                        </div>
+                        <span class="text-2xl font-bold gradient-text tracking-tight">TaskFlow Pro</span>
+                    </a>
+                </div>
+                <!-- Navigation Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <!-- Theme Toggle Button -->
+                    <button id="theme-toggle" class="theme-toggle-btn p-2 rounded-full bg-gray-100 dark:bg-dark-100 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-300 transition-colors duration-300 flex items-center justify-center">
+                        <i class="fas fa-sun text-yellow-500 dark:hidden"></i>
+                        <i class="fas fa-moon text-indigo-300 hidden dark:inline"></i>
+                    </button>
+                    
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="nav-link text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition duration-300 ease-in-out flex items-center font-medium">
+                            <i class="fas fa-home mr-2"></i> Dashboard
+                        </a>
+                        <button id="logout-button" class="nav-button bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-5 py-2 rounded-md shadow-md transition-all duration-300 flex items-center">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                        </button>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="nav-link text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition duration-300 ease-in-out flex items-center font-medium">
+                            <i class="fas fa-sign-in-alt mr-2"></i> Login
+                        </a>
+                        <a href="{% url 'register' %}" class="nav-button bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-5 py-2 rounded-md shadow-md transition-all duration-300 flex items-center">
+                            <i class="fas fa-user-plus mr-2"></i> Register
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-dark-100 border-t border-gray-200 dark:border-gray-800 mt-12 transition-colors duration-300">
+        <div class="container mx-auto px-6 py-8">
+            <p class="text-gray-500 dark:text-gray-400 text-sm">© TechRise python project. Team 1. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <!-- Logout Confirmation Modal -->
+    <div id="logout-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white dark:bg-dark-100 rounded-lg shadow-xl p-6 max-w-md w-full transform transition-all duration-300 scale-95 opacity-0" id="modal-content">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 dark:bg-indigo-900 mb-4">
+                    <i class="fas fa-sign-out-alt text-indigo-600 dark:text-indigo-400 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Confirm Logout</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-6">Are you sure you want to log out of your account?</p>
+                <div class="flex justify-center space-x-4">
+                    <button id="cancel-logout" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 focus:ring-opacity-50">
+                        Cancel
+                    </button>
+                    <a href="{% url 'logout' %}" class="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-md hover:from-indigo-600 hover:to-purple-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                        Yes, Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% block extra_js %}{% endblock %}
+    
+    <!-- Enhanced UI JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme toggle functionality
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const htmlElement = document.documentElement;
+            
+            // Check for saved theme preference or use system preference
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            // Apply the right theme on initial load
+            if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                htmlElement.classList.add('dark');
+                htmlElement.classList.remove('light');
+            } else {
+                htmlElement.classList.add('light');
+                htmlElement.classList.remove('dark');
+            }
+            
+            // Toggle theme when button is clicked
+            themeToggleBtn.addEventListener('click', function() {
+                if (htmlElement.classList.contains('dark')) {
+                    // Switch to light mode
+                    htmlElement.classList.remove('dark');
+                    htmlElement.classList.add('light');
+                    localStorage.setItem('theme', 'light');
+                    
+                    // Add a subtle animation effect
+                    themeToggleBtn.classList.add('rotate-animation');
+                    setTimeout(() => {
+                        themeToggleBtn.classList.remove('rotate-animation');
+                    }, 500);
+                } else {
+                    // Switch to dark mode
+                    htmlElement.classList.remove('light');
+                    htmlElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                    
+                    // Add a subtle animation effect
+                    themeToggleBtn.classList.add('rotate-animation');
+                    setTimeout(() => {
+                        themeToggleBtn.classList.remove('rotate-animation');
+                    }, 500);
+                }
+            });
+            
+            // Navbar scroll effect
+            window.addEventListener('scroll', function() {
+                const nav = document.querySelector('nav');
+                if (window.scrollY > 10) {
+                    nav.classList.add('py-3', 'shadow-xl');
+                    nav.classList.remove('py-4', 'shadow-lg');
+                } else {
+                    nav.classList.add('py-4', 'shadow-lg');
+                    nav.classList.remove('py-3', 'shadow-xl');
+                }
+            });
+            
+            // Add subtle hover effects to all buttons
+            const buttons = document.querySelectorAll('.nav-button');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+            
+            // Add ripple effect to buttons
+            function createRipple(event) {
+                const button = event.currentTarget;
+                
+                const circle = document.createElement('span');
+                const diameter = Math.max(button.clientWidth, button.clientHeight);
+                const radius = diameter / 2;
+                
+                circle.style.width = circle.style.height = `${diameter}px`;
+                circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
+                circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
+                circle.classList.add('ripple');
+                
+                const ripple = button.getElementsByClassName('ripple')[0];
+                
+                if (ripple) {
+                    ripple.remove();
+                }
+                
+                button.appendChild(circle);
+            }
+            
+            const navButtons = document.querySelectorAll('.nav-button');
+            navButtons.forEach(button => {
+                button.addEventListener('click', createRipple);
+            });
+            
+            // Logout confirmation modal
+            const logoutButton = document.getElementById('logout-button');
+            const logoutModal = document.getElementById('logout-modal');
+            const modalContent = document.getElementById('modal-content');
+            const cancelLogout = document.getElementById('cancel-logout');
+            
+            if (logoutButton && logoutModal) {
+                // Show modal when logout button is clicked
+                logoutButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    logoutModal.classList.remove('hidden');
+                    
+                    // Animate modal appearance
+                    setTimeout(() => {
+                        modalContent.classList.remove('scale-95', 'opacity-0');
+                        modalContent.classList.add('scale-100', 'opacity-100');
+                    }, 10);
+                });
+                
+                // Hide modal when cancel is clicked
+                cancelLogout.addEventListener('click', function() {
+                    // Animate modal disappearance
+                    modalContent.classList.remove('scale-100', 'opacity-100');
+                    modalContent.classList.add('scale-95', 'opacity-0');
+                    
+                    setTimeout(() => {
+                        logoutModal.classList.add('hidden');
+                    }, 300);
+                });
+                
+                // Hide modal when clicking outside
+                logoutModal.addEventListener('click', function(e) {
+                    if (e.target === logoutModal) {
+                        // Animate modal disappearance
+                        modalContent.classList.remove('scale-100', 'opacity-100');
+                        modalContent.classList.add('scale-95', 'opacity-0');
+                        
+                        setTimeout(() => {
+                            logoutModal.classList.add('hidden');
+                        }, 300);
+                    }
+                });
+                
+                // Close modal with Escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && !logoutModal.classList.contains('hidden')) {
+                        // Animate modal disappearance
+                        modalContent.classList.remove('scale-100', 'opacity-100');
+                        modalContent.classList.add('scale-95', 'opacity-0');
+                        
+                        setTimeout(() => {
+                            logoutModal.classList.add('hidden');
+                        }, 300);
+                    }
+                });
+            }
+        });
+    </script>
+    
+    <!-- Additional styles for dynamic effects -->
+    <style>
+        .ripple {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        /* Modal animation styles */
+        #modal-content {
+            transition: all 0.3s ease-out;
+        }
+        
+        #modal-content.scale-100 {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        #modal-content.scale-95 {
+            transform: scale(0.95);
+            opacity: 0;
+        }
+        
+        /* Theme toggle animation */
+        .theme-toggle-btn {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .rotate-animation {
+            animation: rotate-toggle 0.5s ease-in-out;
+        }
+        
+        @keyframes rotate-toggle {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Dark mode specific styles */
+        .dark .gradient-text {
+            background: linear-gradient(to right, #818cf8, #c4b5fd);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        /* Improved dark mode styling for specific elements */
+        .dark .notification-bar {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</body>
+</html>

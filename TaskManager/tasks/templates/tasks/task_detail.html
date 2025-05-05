@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}Task Details: {{ task.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .task-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .attachment-card {
+        transition: all 0.3s ease;
+    }
+    
+    .attachment-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .comment-item {
+        border-left: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .comment-item:hover {
+        border-left-color: #6366f1;
+    }
+    
+    .priority-badge {
+        transition: all 0.3s ease;
+    }
+    
+    .priority-badge:hover {
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex items-center justify-between">
+    <div>
+        <a href="{% url 'task_list' %}" class="inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors duration-200">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Tasks
+        </a>
+        <h1 class="text-3xl font-bold mt-2 text-gray-800 dark:text-gray-100">{{ task.title }}</h1>
+    </div>
+    <div class="flex space-x-3">
+        <a href="{% url 'task_delete' task.id %}" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors duration-200 flex items-center">
+            <i class="fas fa-trash-alt mr-2"></i> Delete
+        </a>
+    </div>
+</div>
+
+<!-- Task Details Card -->
+<div class="bg-white dark:bg-dark-100 rounded-xl shadow-lg p-6 mb-8 task-card hover:shadow-xl transition-all duration-300">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <div class="mb-4">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Description</h3>
+                <p class="text-gray-800 dark:text-gray-200">{{ task.description|linebreaks }}</p>
+            </div>
+            
+            <div class="mb-4">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Due Date</h3>
+                <p class="text-gray-800 dark:text-gray-200 flex items-center">
+                    <i class="far fa-calendar-alt mr-2 text-indigo-500 dark:text-indigo-400"></i>
+                    {{ task.due_date|date:"F j, Y" }}
+                </p>
+            </div>
+        </div>
+        
+        <div>
+            <div class="mb-4">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Status</h3>
+                <div class="flex items-center">
+                    {% if task.completed %}
+                        <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm font-medium">
+                            <i class="fas fa-check-circle mr-1"></i> Completed
+                        </span>
+                    {% else %}
+                        <span class="px-3 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full text-sm font-medium">
+                            <i class="fas fa-clock mr-1"></i> Pending
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Created At</h3>
+                <p class="text-gray-800 dark:text-gray-200 flex items-center">
+                    <i class="far fa-calendar-plus mr-2 text-indigo-500 dark:text-indigo-400"></i>
+                    {{ task.created_at|date:"F j, Y" }}
+                </p>
+            </div>
+            
+
+        </div>
+    </div>
+    
+    <!-- Task Actions -->
+    <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex flex-wrap gap-3">
+            <form method="post" action="{% url 'task_detail' task.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="toggle_status" value="1">
+                <button type="submit" class="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-md transition-colors duration-200 flex items-center">
+                    {% if task.completed %}
+                        <i class="fas fa-undo mr-2"></i> Mark as Pending
+                    {% else %}
+                        <i class="fas fa-check mr-2"></i> Mark as Completed
+                    {% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Attachments Section -->
+<div class="bg-white dark:bg-dark-100 rounded-xl shadow-lg p-6 mb-8">
+    <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center">
+        <i class="fas fa-paperclip mr-2 text-indigo-500 dark:text-indigo-400"></i> Attachments
+    </h2>
+    
+    <!-- File Upload Form -->
+    <form method="post" enctype="multipart/form-data" class="mb-6 p-4 bg-gray-50 dark:bg-dark-200 rounded-lg">
+        {% csrf_token %}
+        <input type="hidden" name="file_upload" value="1">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex-grow">
+                <label for="id_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Upload File</label>
+                <input type="file" name="file" id="id_file" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 dark:focus:border-indigo-400 dark:bg-dark-100 dark:text-gray-200">
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-md transition-colors duration-200 flex items-center">
+                    <i class="fas fa-upload mr-2"></i> Upload
+                </button>
+            </div>
+        </div>
+    </form>
+    
+    <!-- Attachments List -->
+    {% if attachments %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for attachment in attachments %}
+                <div class="attachment-card bg-gray-50 dark:bg-dark-200 rounded-lg p-4 shadow hover:shadow-md">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center">
+                            <div class="bg-indigo-100 dark:bg-indigo-900 p-2 rounded-lg mr-3">
+                                <i class="fas fa-file-alt text-indigo-600 dark:text-indigo-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-800 dark:text-gray-200 truncate max-w-[150px]">{{ attachment.file.name|slice:"10:" }}</h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ attachment.uploaded_at|date:"M d, Y" }}</p>
+                            </div>
+                        </div>
+                        <a href="{{ attachment.file.url }}" download class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300">
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+            <i class="fas fa-file-upload text-4xl mb-2"></i>
+            <p>No attachments yet. Upload files to share with this task.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Comments Section -->
+<div class="bg-white dark:bg-dark-100 rounded-xl shadow-lg p-6">
+    <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center">
+        <i class="fas fa-comments mr-2 text-indigo-500 dark:text-indigo-400"></i> Comments
+    </h2>
+    
+    <!-- Comment Form -->
+    <form method="post" class="mb-6 p-4 bg-gray-50 dark:bg-dark-200 rounded-lg">
+        {% csrf_token %}
+        <input type="hidden" name="add_comment" value="1">
+        <div class="mb-4">
+            <label for="id_content" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Add a comment</label>
+            <textarea name="content" id="id_content" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 dark:focus:border-indigo-400 dark:bg-dark-100 dark:text-gray-200" placeholder="Write your comment here..."></textarea>
+        </div>
+        <div class="flex justify-end">
+            <button type="submit" class="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-md transition-colors duration-200 flex items-center">
+                <i class="fas fa-paper-plane mr-2"></i> Post Comment
+            </button>
+        </div>
+    </form>
+    
+    <!-- Comments List -->
+    {% if comments %}
+        <div class="space-y-4">
+            {% for comment in comments %}
+                <div class="comment-item bg-gray-50 dark:bg-dark-200 rounded-lg p-4 pl-5">
+                    <div class="flex items-start mb-2">
+                        <div class="bg-indigo-100 dark:bg-indigo-900 p-2 rounded-full mr-3">
+                            <i class="fas fa-user text-indigo-600 dark:text-indigo-400"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ comment.user.username }}</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ comment.created_at|date:"M d, Y" }} at {{ comment.created_at|time:"H:i" }}</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 dark:text-gray-300 ml-10">{{ comment.content|linebreaks }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+            <i class="far fa-comment-dots text-4xl mb-2"></i>
+            <p>No comments yet. Be the first to comment on this task.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add animation to task card
+        const taskCard = document.querySelector('.task-card');
+        if (taskCard) {
+            taskCard.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            taskCard.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,168 @@
+<!-- filepath: c:\Users\HP\Desktop\task_manager\TaskManager\tasks\templates\tasks\task_list.html -->
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<style>
+    .task-item {
+        transition: all 0.2s ease;
+    }
+    .task-item:hover {
+        transform: translateX(5px);
+    }
+    .filter-badge {
+        transition: all 0.2s ease;
+    }
+    .filter-badge:hover {
+        transform: scale(1.05);
+    }
+    .priority-high {
+        background: linear-gradient(to right, #f87171, #ef4444);
+    }
+    .priority-medium {
+        background: linear-gradient(to right, #fbbf24, #f59e0b);
+    }
+    .priority-low {
+        background: linear-gradient(to right, #60a5fa, #3b82f6);
+    }
+    .checkbox-container {
+        display: inline-block;
+        position: relative;
+        cursor: pointer;
+    }
+    .custom-checkbox {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        border: 2px solid #d1d5db;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    .custom-checkbox:hover {
+        border-color: #0ea5e9;
+    }
+    .custom-checkbox.checked {
+        background-color: #0ea5e9;
+        border-color: #0ea5e9;
+    }
+    .custom-checkbox.checked i {
+        display: block;
+    }
+    .custom-checkbox i {
+        display: none;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header Section -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-list-check text-primary-500 mr-3"></i> My Tasks
+                </h1>
+                <p class="text-gray-600 mt-1">Manage and organize all your tasks in one place</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <a href="{% url 'task_create' %}" class="btn-gradient text-black px-5 py-2 rounded-lg flex items-center shadow-md hover:shadow-lg transition duration-300">
+                    <i class="fas fa-plus mr-2"></i> Create New Task
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tasks List Section -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        {% if tasks %}
+            <div class="mb-4 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-800">
+                    {% if status == 'completed' %}
+                        Completed Tasks
+                    {% elif status == 'pending' %}
+                        Pending Tasks
+                    {% else %}
+                        All Tasks
+                    {% endif %}
+                    <span class="ml-2 bg-gray-100 text-gray-700 text-sm font-medium px-2.5 py-0.5 rounded-full">{{ tasks|length }}</span>
+                </h3>
+                <div class="text-sm text-gray-500">
+                    {% if sort == 'asc' %}
+                        Sorted by: Due Date (Earliest First)
+                    {% elif sort == 'desc' %}
+                        Sorted by: Due Date (Latest First)
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="divide-y divide-gray-200">
+                {% for task in tasks %}
+                    <div class="py-4 flex items-center task-item">
+                        <!-- Task Checkbox -->
+                        <div class="mr-4">
+                            <label class="checkbox-container">
+                                <div class="custom-checkbox {% if task.completed %}checked{% endif %}" data-task-id="{{ task.id }}">
+                                    <i class="fas fa-check text-xs"></i>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <!-- Task Content -->
+                        <div class="flex-grow">
+                            <a href="{% url 'task_detail' task.id %}" class="block">
+                                <h4 class="text-lg font-medium text-gray-800 {% if task.completed %}line-through text-gray-500{% endif %}">
+                                    {{ task.title }}
+                                </h4>
+                                <p class="text-sm text-gray-600 mt-1 {% if task.completed %}line-through text-gray-400{% endif %}">
+                                    {{ task.description|truncatechars:100 }}
+                                </p>
+                                <div class="flex items-center mt-2">
+                                    <span class="text-xs text-gray-500 flex items-center mr-4">
+                                        <i class="far fa-calendar mr-1"></i> Due: {{ task.due_date|date:"M d, Y" }}
+                                    </span>
+                                    <span class="text-xs text-gray-500 flex items-center">
+                                        <i class="far fa-clock mr-1"></i> Created: {{ task.created_at|date:"M d, Y" }}
+                                    </span>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <!-- Task Status -->
+                        <div class="ml-4 flex items-center space-x-2">
+                            {% if task.completed %}
+                                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full flex items-center">
+                                    <i class="fas fa-check-circle mr-1"></i> Completed
+                                </span>
+                            {% else %}
+                                <span class="bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-0.5 rounded-full flex items-center">
+                                    <i class="fas fa-hourglass-half mr-1"></i> Pending
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-12">
+                <div class="bg-gray-100 inline-block p-6 rounded-full mb-4">
+                    <i class="fas fa-clipboard-list text-gray-400 text-4xl"></i>
+                </div>
+                <h3 class="text-xl font-medium text-gray-700 mb-2">No tasks found</h3>
+                <p class="text-gray-500 mb-6 max-w-md mx-auto">
+                    {% if status %}
+                        No {{ status }} tasks found. Try changing your filters or create a new task.
+                    {% else %}
+                        You don't have any tasks yet. Start by creating your first task.
+                    {% endif %}
+                </p>
+                <a href="{% url 'task_create' %}" class="btn-gradient text-white px-6 py-3 rounded-lg inline-flex items-center">
+                    <i class="fas fa-plus mr-2"></i> Create New Task
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
