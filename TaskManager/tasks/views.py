@@ -124,6 +124,21 @@ def task_detail(request, task_id):
         'attachments': attachments,
     })
 @login_required
+def task_edit(request, task_id):
+    task = get_object_or_404(Task, id=task_id, assigned_to=request.user)
+    
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Task updated successfully!")
+            return redirect('task_detail', task_id=task.id)
+    else:
+        form = TaskForm(instance=task)
+    
+    return render(request, 'tasks/task_form.html', {'form': form, 'title': 'Edit Task'})
+
+@login_required
 def task_delete(request, task_id):
     task = get_object_or_404(Task, id=task_id, assigned_to=request.user)
 
@@ -141,11 +156,93 @@ def user_profile(request):
     total = tasks.count()
     completed = tasks.filter(completed=True).count()
     pending = tasks.filter(completed=False).count()
-
-    context = {
-        'user': user,
-        'total_tasks': total,
-        'completed_tasks': completed,
-        'pending_tasks': pending,
-    }
+    
+    # Check if UserProfile exists in the database schema
+    from django.db import connection
+    cursor = connection.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='tasks_userprofile';")
+    table_exists = cursor.fetchone() is not None
+    
+    # If the table doesn't exist, we'll use a simplified context
+    if not table_exists:
+        context = {
+            'user': user,
+            'total_tasks': total,
+            'completed_tasks': completed,
+            'pending_tasks': pending,
+            'profile_table_missing': True,
+        }
+    else:
+        context = {
+            'user': user,
+            'total_tasks': total,
+            'completed_tasks': completed,
+            'pending_tasks': pending,
+        }
+    
     return render(request, 'tasks/profile.html', context)
+
+@login_required
+def update_profile(request):
+    user = request.user
+    
+    # Check if UserProfile exists in the database schema
+    from django.db import connection
+    cursor = connection.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='tasks_userprofile';")
+    table_exists = cursor.fetchone() is not None
+    
+    # If the table doesn't exist, we'll use a simplified approach
+    if not table_exists:
+        if request.method == 'POST':
+            # Update user information only
+            user.first_name = request.POST.get('first_name', '')
+            user.last_name = request.POST.get('last_name', '')
+            user.email = request.POST.get('email', '')
+            
+            # Save changes
+            user.save()
+            
+            messages.success(request, "Basic profile information updated successfully!")
+            return redirect('user_profile')
+        
+        context = {
+            'user': user,
+            'profile_table_missing': True,
+        }
+    else:
+        # Normal flow when the profile table exists
+        try:
+            profile = user.profile
+        except:
+            # If the user doesn't have a profile yet, create one
+            from tasks.models import UserProfile
+            profile = UserProfile(user=user)
+            profile.save()
+        
+        if request.method == 'POST':
+            # Update user information
+            user.first_name = request.POST.get('first_name', '')
+            user.last_name = request.POST.get('last_name', '')
+            user.email = request.POST.get('email', '')
+            
+            # Update profile information
+            profile.bio = request.POST.get('bio', '')
+            
+            # Handle profile picture upload
+            if 'profile_picture' in request.FILES:
+                profile.profile_picture = request.FILES['profile_picture']
+            
+            # Save changes
+            user.save()
+            profile.save()
+            
+            messages.success(request, "Profile updated successfully!")
+            return redirect('user_profile')
+        
+        context = {
+            'user': user,
+            'profile': profile,
+        }
+    
+    return render(request, 'tasks/update_profile.html', context)

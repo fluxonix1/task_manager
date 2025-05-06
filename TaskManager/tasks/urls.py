@@ -8,8 +8,10 @@ urlpatterns = [
     path('list/', views.task_list, name='task_list'),
     path('create/', views.task_create, name='task_create'),
     path('<int:task_id>/', views.task_detail, name='task_detail'),
+    path('<int:task_id>/edit/', views.task_edit, name='task_edit'),
     path('<int:task_id>/delete/', views.task_delete, name='task_delete'),
     path('profile/', views.user_profile, name='user_profile'),
+    path('profile/update/', views.update_profile, name='update_profile'),
 ]
 
 if settings.DEBUG:

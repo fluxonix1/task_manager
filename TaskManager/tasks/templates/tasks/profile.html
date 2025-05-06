@@ -2,17 +2,47 @@
 
 {% block content %}
 <div class="max-w-3xl mx-auto py-10 px-6">
+    {% if profile_table_missing %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded shadow">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-yellow-700">
+                    <strong>Database migration required:</strong> To enable profile pictures and bio, please run database migrations.
+                    <a href="#" class="font-medium underline text-yellow-700 hover:text-yellow-600">See migration guide for details.</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     <div class="bg-white p-6 rounded shadow space-y-6">
         <h2 class="text-2xl font-bold mb-4">Your Profile</h2>
 
         <div class="flex items-center gap-4">
-            <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center text-2xl font-bold text-gray-700">
-                {{ user.first_name|default:user.username|slice:":1"|upper }}
-            </div>
+            {% if profile_table_missing %}
+                <div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-2xl font-bold text-white">
+                    {{ user.first_name|default:user.username|slice:":1"|upper }}
+                </div>
+            {% else %}
+                {% if user.profile.profile_picture %}
+                    <div class="w-20 h-20 rounded-full overflow-hidden">
+                        <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}" class="w-full h-full object-cover">
+                    </div>
+                {% else %}
+                    <div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-2xl font-bold text-white">
+                        {{ user.first_name|default:user.username|slice:":1"|upper }}
+                    </div>
+                {% endif %}
+            {% endif %}
             <div>
                 <p class="text-lg font-semibold">{{ user.get_full_name|default:user.username }}</p>
                 <p class="text-gray-600">{{ user.email }}</p>
                 <p class="text-sm text-gray-500">Joined: {{ user.date_joined|date:"F j, Y" }}</p>
+                {% if not profile_table_missing and user.profile.bio %}
+                    <p class="text-gray-700 mt-2 italic">"{{ user.profile.bio }}"</p>
+                {% endif %}
             </div>
         </div>
 
@@ -33,9 +63,12 @@
             </div>
         </div>
 
-        <div class="mt-6 text-center">
+        <div class="mt-6 text-center space-x-4">
             <a href="{% url 'task_list' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
                 View My Tasks
+            </a>
+            <a href="{% url 'update_profile' %}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                Update Profile
             </a>
         </div>
     </div>
